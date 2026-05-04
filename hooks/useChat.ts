@@ -36,16 +36,18 @@ export function useConversations(userId: string, projectId: string) {
   });
 }
 
-export function useMessages(conversationId: string) {
+export function useMessages(conversationId: string, userId: string, projectId: string) {
   return useQuery({
-    queryKey: ['messages', conversationId],
+    queryKey: ['messages', conversationId, userId, projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/chat/messages/${conversationId}`);
+      const res = await fetch(
+        `/api/chat/messages/${conversationId}?userId=${userId}&projectId=${projectId}`
+      );
       if (!res.ok) throw new Error('Failed to fetch messages');
       const data = await res.json();
       return data.messages as Message[];
     },
-    enabled: !!conversationId,
+    enabled: !!conversationId && !!userId && !!projectId,
   });
 }
 
