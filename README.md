@@ -4,7 +4,7 @@ A production-grade multi-tenant AI SaaS platform with a config-driven admin dash
 
 ## 🏗️ Architecture Overview
 
-This is a **FAANG-level production system** designed for scalability, maintainability, and real-world deployment.
+This is a **Production system** designed for scalability, maintainability, and real-world deployment.
 
 ### Core Features
 
