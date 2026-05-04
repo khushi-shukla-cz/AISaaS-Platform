@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AccessLayer } from '@/server/access';
 import { AdminService } from '@/services/admin.service';
+import { DEMO_USER_ID } from '@/lib/demo-identity';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const projectId = searchParams.get('projectId');
-    const userId = searchParams.get('userId');
 
-    if (!projectId || !userId) {
-      return NextResponse.json(
-        { error: 'projectId and userId are required' },
-        { status: 400 }
-      );
+    if (!projectId) {
+      return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
     }
 
-    await AccessLayer.validateAdminAccess(userId);
-    await AccessLayer.validateUserProjectAccess(userId, projectId);
+    await AccessLayer.validateAdminAccess(DEMO_USER_ID);
+    await AccessLayer.validateUserProjectAccess(DEMO_USER_ID, projectId);
 
     const config = await AdminService.getDashboardConfig(projectId);
 
