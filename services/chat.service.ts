@@ -5,6 +5,7 @@ import { ProductInstance } from '@/models/ProductInstance';
 import { Project } from '@/models/Project';
 import { AIService, AIMessage } from './ai.service';
 import { IntegrationService } from './integration.service';
+import { AccessDeniedError } from '@/server/access';
 
 export interface SendMessageParams {
   conversationId: string;
@@ -19,17 +20,32 @@ export interface MessageResponse {
 }
 
 export class ChatService {
+  private static async getScopedConversation(
+    conversationId: string,
+    userId: string,
+    projectId: string
+  ) {
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      userId,
+      projectId,
+    });
+
+    if (!conversation) {
+      throw new AccessDeniedError('Conversation not found or access denied');
+    }
+
+    return conversation;
+  }
+
   static async sendMessage(params: SendMessageParams): Promise<MessageResponse> {
     await connectDB();
 
     const { conversationId, projectId, userId, content } = params;
 
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) {
-      throw new Error('Conversation not found');
-    }
+    const conversation = await this.getScopedConversation(conversationId, userId, projectId);
 
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(conversation.projectId);
     if (!project) {
       throw new Error('Project not found');
     }
@@ -40,8 +56,8 @@ export class ChatService {
     }
 
     const userMessage = await Message.create({
-      conversationId,
-      projectId,
+      conversationId: conversation._id,
+      projectId: conversation.projectId,
       role: 'user',
       content,
     });
@@ -51,7 +67,7 @@ export class ChatService {
 
     thinkingSteps.push('Processing your request...');
 
-    const previousMessages = await Message.find({ conversationId })
+    const previousMessages = await Message.find({ conversationId: conversation._id })
       .sort({ createdAt: 1 })
       .limit(10);
 
@@ -96,8 +112,8 @@ export class ChatService {
     );
 
     const assistantMessage = await Message.create({
-      conversationId,
-      projectId,
+      conversationId: conversation._id,
+      projectId: conversation.projectId,
       role: 'assistant',
       content: aiResponse.content,
       metadata: {
@@ -113,10 +129,15 @@ export class ChatService {
     };
   }
 
-  static async getConversationMessages(conversationId: string): Promise<IMessage[]> {
+  static async getConversationMessages(
+    conversationId: string,
+    userId: string,
+    projectId: string
+  ): Promise<IMessage[]> {
     await connectDB();
-    
-    const messages = await Message.find({ conversationId }).sort({ createdAt: 1 });
+
+    const conversation = await this.getScopedConversation(conversationId, userId, projectId);
+    const messages = await Message.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
     return messages;
   }
 
