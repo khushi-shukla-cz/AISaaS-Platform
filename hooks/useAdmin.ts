@@ -35,11 +35,11 @@ export interface DashboardConfig {
   };
 }
 
-export function useDashboardConfig(userId: string, projectId: string) {
+export function useDashboardConfig(projectId: string) {
   return useQuery({
     queryKey: ['dashboard-config', projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/config?userId=${userId}&projectId=${projectId}`);
+      const res = await fetch(`/api/admin/config?projectId=${projectId}`);
       if (!res.ok) throw new Error('Failed to fetch dashboard config');
       const data = await res.json();
       return data.config as DashboardConfig | null;
@@ -47,11 +47,11 @@ export function useDashboardConfig(userId: string, projectId: string) {
   });
 }
 
-export function useDashboardStats(userId: string, projectId: string) {
+export function useDashboardStats(projectId: string) {
   return useQuery({
     queryKey: ['dashboard-stats', projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/stats?userId=${userId}&projectId=${projectId}`);
+      const res = await fetch(`/api/admin/stats?projectId=${projectId}`);
       if (!res.ok) throw new Error('Failed to fetch stats');
       const data = await res.json();
       return data.stats as DashboardStats;
@@ -59,11 +59,11 @@ export function useDashboardStats(userId: string, projectId: string) {
   });
 }
 
-export function useActivity(userId: string, projectId: string) {
+export function useActivity(projectId: string) {
   return useQuery({
     queryKey: ['activity', projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/activity?userId=${userId}&projectId=${projectId}`);
+      const res = await fetch(`/api/admin/activity?projectId=${projectId}`);
       if (!res.ok) throw new Error('Failed to fetch activity');
       const data = await res.json();
       return data.activity as ActivityItem[];
@@ -71,11 +71,11 @@ export function useActivity(userId: string, projectId: string) {
   });
 }
 
-export function useIntegrations(userId: string, projectId: string) {
+export function useIntegrations(projectId: string) {
   return useQuery({
     queryKey: ['integrations', projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/integrations?userId=${userId}&projectId=${projectId}`);
+      const res = await fetch(`/api/admin/integrations?projectId=${projectId}`);
       if (!res.ok) throw new Error('Failed to fetch integrations');
       const data = await res.json();
       return data.integrations as Record<string, IntegrationStatus>;
