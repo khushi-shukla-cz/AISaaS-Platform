@@ -2,17 +2,32 @@
 
 import ChatInterface from '@/components/ChatInterface';
 import { useEffect, useState } from 'react';
-import { useCreateConversation } from '@/hooks/useChat';
-
-const DEMO_USER_ID = '000000000000000000000001';
-const DEMO_PROJECT_ID = '000000000000000000000002';
-const DEMO_PRODUCT_INSTANCE_ID = '000000000000000000000003';
+import { useConversations, useCreateConversation } from '@/hooks/useChat';
+import {
+  DEMO_PRODUCT_INSTANCE_ID,
+  DEMO_PROJECT_ID,
+  DEMO_USER_ID,
+} from '@/lib/demo-identity';
 
 export default function ChatPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const { data: conversations, isLoading: conversationsLoading } = useConversations(
+    DEMO_USER_ID,
+    DEMO_PROJECT_ID
+  );
   const createConversation = useCreateConversation();
 
   useEffect(() => {
+    if (conversationId || conversationsLoading || !conversations) {
+      return;
+    }
+
+    const existingConversation = conversations[0];
+    if (existingConversation) {
+      setConversationId(existingConversation._id.toString());
+      return;
+    }
+
     const initConversation = async () => {
       try {
         const conversation = await createConversation.mutateAsync({
@@ -27,9 +42,9 @@ export default function ChatPage() {
     };
 
     initConversation();
-  }, []);
+  }, [conversationId, conversations, conversationsLoading, createConversation]);
 
-  if (!conversationId) {
+  if (conversationsLoading || !conversationId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
