@@ -1,0 +1,32 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { AccessLayer } from '@/server/access';
+import { AdminService } from '@/services/admin.service';
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const projectId = searchParams.get('projectId');
+    const userId = searchParams.get('userId');
+
+    if (!projectId || !userId) {
+      return NextResponse.json(
+        { error: 'projectId and userId are required' },
+        { status: 400 }
+      );
+    }
+
+    await AccessLayer.validateAdminAccess(userId);
+    await AccessLayer.validateUserProjectAccess(userId, projectId);
+
+    const integrations = await AdminService.getIntegrationStatus(projectId);
+
+    return NextResponse.json({ integrations });
+  } catch (error: any) {
+    console.error('Fetch integrations error:', error);
+    
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch integrations' },
+      { status: error.name === 'AccessDeniedError' ? 403 : 500 }
+    );
+  }
+}
