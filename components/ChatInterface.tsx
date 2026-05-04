@@ -19,7 +19,7 @@ export default function ChatInterface({
   projectId,
   userId,
 }: ChatInterfaceProps) {
-  const { data: messages, isLoading } = useMessages(conversationId);
+  const { data: messages, isLoading } = useMessages(conversationId, userId, projectId);
   const sendMessage = useSendMessage();
   const [isThinking, setIsThinking] = useState(false);
   const [thinkingSteps, setThinkingSteps] = useState<string[]>([]);
