@@ -4,6 +4,7 @@ import { Message } from '@/models/Message';
 import { Conversation } from '@/models/Conversation';
 import { User } from '@/models/User';
 import { Project } from '@/models/Project';
+import { AuditService } from '@/services/audit.service';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -14,7 +15,7 @@ export interface DashboardStats {
 
 export interface ActivityItem {
   id: string;
-  type: 'conversation' | 'user' | 'message';
+  type: 'conversation' | 'user' | 'message' | 'audit';
   title: string;
   description: string;
   timestamp: Date;
@@ -62,20 +63,34 @@ export class AdminService {
   static async getRecentActivity(projectId: string, limit: number = 10): Promise<ActivityItem[]> {
     await connectDB();
 
-    const recentMessages = await Message.find({ projectId })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate('conversationId');
+    const [recentMessages, recentAuditEvents] = await Promise.all([
+      Message.find({ projectId })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .populate('conversationId'),
+      AuditService.getRecentEvents(projectId, limit),
+    ]);
 
-    const activities: ActivityItem[] = recentMessages.map((msg, index) => ({
-      id: msg._id.toString(),
-      type: 'message' as const,
-      title: msg.role === 'user' ? 'User Message' : 'AI Response',
-      description: msg.content.substring(0, 100) + (msg.content.length > 100 ? '...' : ''),
-      timestamp: msg.createdAt,
-    }));
+    const activities: ActivityItem[] = [
+      ...recentMessages.map((msg) => ({
+        id: msg._id.toString(),
+        type: 'message' as const,
+        title: msg.role === 'user' ? 'User Message' : 'AI Response',
+        description: msg.content.substring(0, 100) + (msg.content.length > 100 ? '...' : ''),
+        timestamp: msg.createdAt,
+      })),
+      ...recentAuditEvents.map((event) => ({
+        id: event.id,
+        type: 'audit' as const,
+        title: event.title,
+        description: event.description,
+        timestamp: event.timestamp,
+      })),
+    ];
 
-    return activities;
+    return activities
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, limit);
   }
 
   static async getIntegrationStatus(projectId: string) {
@@ -111,6 +126,17 @@ export class AdminService {
       { $set: config },
       { new: true, upsert: true }
     );
+
+    await AuditService.logEvent({
+      projectId,
+      actorRole: 'admin',
+      action: 'admin.dashboard_config_updated',
+      resourceType: 'dashboard-config',
+      resourceId: updatedConfig._id.toString(),
+      details: {
+        widgetCount: updatedConfig.layout?.widgets?.length ?? 0,
+      },
+    });
 
     return updatedConfig;
   }
