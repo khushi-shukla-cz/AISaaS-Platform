@@ -10,6 +10,11 @@ export interface Message {
     thinkingSteps?: string[];
     integrationsUsed?: string[];
     processingTime?: number;
+    tokenUsage?: {
+      promptTokens?: number;
+      responseTokens?: number;
+      totalTokens?: number;
+    };
   };
   createdAt: string;
 }
@@ -28,7 +33,12 @@ export function useConversations(userId: string, projectId: string) {
   return useQuery({
     queryKey: ['conversations', userId, projectId],
     queryFn: async () => {
-      const res = await fetch(`/api/chat/conversations/list?userId=${userId}&projectId=${projectId}`);
+      const res = await fetch(`/api/chat/conversations/list?userId=${userId}&projectId=${projectId}`, {
+        headers: {
+          'x-user-id': userId,
+          'x-project-id': projectId,
+        },
+      });
       if (!res.ok) throw new Error('Failed to fetch conversations');
       const data = await res.json();
       return data.conversations as Conversation[];
@@ -42,6 +52,13 @@ export function useMessages(conversationId: string, userId: string, projectId: s
     queryFn: async () => {
       const res = await fetch(
         `/api/chat/messages/${conversationId}?userId=${userId}&projectId=${projectId}`
+        ,
+        {
+          headers: {
+            'x-user-id': userId,
+            'x-project-id': projectId,
+          },
+        }
       );
       if (!res.ok) throw new Error('Failed to fetch messages');
       const data = await res.json();
@@ -63,7 +80,11 @@ export function useSendMessage() {
     }) => {
       const res = await fetch('/api/chat/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': params.userId,
+          'x-project-id': params.projectId,
+        },
         body: JSON.stringify(params),
       });
 
@@ -92,7 +113,11 @@ export function useCreateConversation() {
     }) => {
       const res = await fetch('/api/chat/conversations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': params.userId,
+          'x-project-id': params.projectId,
+        },
         body: JSON.stringify(params),
       });
 
