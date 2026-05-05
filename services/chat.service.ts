@@ -6,6 +6,7 @@ import { Project } from '@/models/Project';
 import { AIService, AIMessage } from './ai.service';
 import { IntegrationService } from './integration.service';
 import { AccessDeniedError } from '@/server/access';
+import { AuditService } from './audit.service';
 
 export interface SendMessageParams {
   conversationId: string;
@@ -60,6 +61,18 @@ export class ChatService {
       projectId: conversation.projectId,
       role: 'user',
       content,
+    });
+
+    await AuditService.logEvent({
+      projectId: conversation.projectId.toString(),
+      userId: userId,
+      actorRole: 'user',
+      action: 'chat.message_sent',
+      resourceType: 'conversation',
+      resourceId: conversation._id.toString(),
+      details: {
+        contentLength: content.length,
+      },
     });
 
     const thinkingSteps: string[] = [];
@@ -120,6 +133,20 @@ export class ChatService {
         thinkingSteps: [...thinkingSteps, ...aiResponse.thinkingSteps],
         integrationsUsed,
         processingTime: aiResponse.processingTime,
+        tokenUsage: aiResponse.tokenUsage,
+      },
+    });
+
+    await AuditService.logEvent({
+      projectId: conversation.projectId.toString(),
+      userId: userId,
+      actorRole: 'system',
+      action: 'chat.ai_response_generated',
+      resourceType: 'conversation',
+      resourceId: conversation._id.toString(),
+      details: {
+        integrationsUsed: integrationsUsed.join(', ') || 'none',
+        processingTime: aiResponse.processingTime,
       },
     });
 
@@ -163,6 +190,18 @@ export class ChatService {
       projectId,
       productInstanceId,
       title: 'New Conversation',
+    });
+
+    await AuditService.logEvent({
+      projectId,
+      userId,
+      actorRole: 'user',
+      action: 'chat.conversation_created',
+      resourceType: 'conversation',
+      resourceId: conversation._id.toString(),
+      details: {
+        productInstanceId,
+      },
     });
 
     return conversation;

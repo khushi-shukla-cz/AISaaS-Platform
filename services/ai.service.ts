@@ -10,6 +10,11 @@ export interface AIResponse {
   content: string;
   thinkingSteps: string[];
   processingTime: number;
+  tokenUsage?: {
+    promptTokens?: number;
+    responseTokens?: number;
+    totalTokens?: number;
+  };
 }
 
 export class AIService {
@@ -56,6 +61,7 @@ export class AIService {
 
       const data = await response.json();
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I could not generate a response.';
+      const usageMetadata = data.usageMetadata;
 
       const processingTime = Date.now() - startTime;
 
@@ -63,6 +69,13 @@ export class AIService {
         content,
         thinkingSteps,
         processingTime,
+        tokenUsage: usageMetadata
+          ? {
+              promptTokens: usageMetadata.promptTokenCount,
+              responseTokens: usageMetadata.candidatesTokenCount,
+              totalTokens: usageMetadata.totalTokenCount,
+            }
+          : undefined,
       };
     } catch (error) {
       console.error('AI Service Error:', error);

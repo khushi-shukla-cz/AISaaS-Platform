@@ -10,6 +10,11 @@ export interface IMessage {
     thinkingSteps?: string[];
     integrationsUsed?: string[];
     processingTime?: number;
+    tokenUsage?: {
+      promptTokens?: number;
+      responseTokens?: number;
+      totalTokens?: number;
+    };
   };
   createdAt: Date;
   updatedAt: Date;
