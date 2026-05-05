@@ -7,13 +7,14 @@ import { motion } from 'framer-motion';
 
 interface AdminDashboardProps {
   projectId: string;
+  userId: string;
 }
 
-export default function AdminDashboard({ projectId }: AdminDashboardProps) {
-  const { data: config, isLoading: configLoading } = useDashboardConfig(projectId);
-  const { data: stats, isLoading: statsLoading } = useDashboardStats(projectId);
-  const { data: activity, isLoading: activityLoading } = useActivity(projectId);
-  const { data: integrations, isLoading: integrationsLoading } = useIntegrations(projectId);
+export default function AdminDashboard({ projectId, userId }: AdminDashboardProps) {
+  const { data: config, isLoading: configLoading } = useDashboardConfig(projectId, userId);
+  const { data: stats, isLoading: statsLoading } = useDashboardStats(projectId, userId);
+  const { data: activity, isLoading: activityLoading } = useActivity(projectId, userId);
+  const { data: integrations, isLoading: integrationsLoading } = useIntegrations(projectId, userId);
 
   const isLoading = configLoading || statsLoading || activityLoading || integrationsLoading;
 
