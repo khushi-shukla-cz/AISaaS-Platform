@@ -15,6 +15,12 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
+  const typeStyles: Record<string, string> = {
+    audit: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+    message: 'bg-sky-500/15 text-sky-300 border-sky-500/20',
+    user: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,7 +44,14 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               )}
             </div>
             <div className="flex-1 pb-4">
-              <p className="font-medium text-foreground">{activity.title}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-foreground">{activity.title}</p>
+                <span
+                  className={`text-[10px] uppercase tracking-[0.2em] border rounded-full px-2 py-0.5 ${typeStyles[activity.type] || 'bg-border/40 text-muted-foreground border-border'}`}
+                >
+                  {activity.type}
+                </span>
+              </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {activity.description}
               </p>
