@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AccessLayer } from '@/server/access';
 import { AdminService } from '@/services/admin.service';
-import { DEMO_USER_ID } from '@/lib/demo-identity';
+import { getRequestContext } from '@/lib/request-context';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,8 +12,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
     }
 
-    await AccessLayer.validateAdminAccess(DEMO_USER_ID);
-    await AccessLayer.validateUserProjectAccess(DEMO_USER_ID, projectId);
+    const requestContext = getRequestContext(request);
+    await AccessLayer.validateAdminAccess(requestContext.userId);
+    await AccessLayer.validateUserProjectAccess(requestContext.userId, projectId);
 
     const integrations = await AdminService.getIntegrationStatus(projectId);
 
