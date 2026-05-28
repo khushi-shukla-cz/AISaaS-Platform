@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { AccessLayer } from '@/server/access';
 import { ChatService } from '@/services/chat.service';
 import { getRequestContext } from '@/lib/request-context';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitRedis } from '@/lib/redis-rate-limit';
+import { aiQueue } from '@/lib/ai-queue';
 
 const sendMessageSchema = z.object({
   conversationId: z.string(),
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'projectId does not match request context' }, { status: 400 });
     }
 
-    const rateLimit = checkRateLimit(`chat:${projectId}:${userId}`, 20, 10 * 60 * 1000);
+    const rateLimit = await checkRateLimitRedis(`chat:${projectId}:${userId}`, 20, 10 * 60 * 1000);
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       userId,
       projectId,
       content: validated.content,
+      useQueue: true,
     });
 
     return NextResponse.json(result, {

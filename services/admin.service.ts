@@ -5,6 +5,8 @@ import { Conversation } from '@/models/Conversation';
 import { User } from '@/models/User';
 import { Project } from '@/models/Project';
 import { AuditService } from '@/services/audit.service';
+import { AuditEvent } from '@/models/AuditEvent';
+import { getPaginationParams, createPaginatedResult, PaginatedResult } from '@/lib/pagination';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -60,15 +62,24 @@ export class AdminService {
     };
   }
 
-  static async getRecentActivity(projectId: string, limit: number = 10): Promise<ActivityItem[]> {
+  static async getRecentActivityPaginated(
+    projectId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<PaginatedResult<ActivityItem>> {
     await connectDB();
 
-    const [recentMessages, recentAuditEvents] = await Promise.all([
+    const skip = (page - 1) * limit;
+
+    const [recentMessages, recentAuditEvents, totalMessages, totalAuditEvents] = await Promise.all([
       Message.find({ projectId })
         .sort({ createdAt: -1 })
+        .skip(skip)
         .limit(limit)
         .populate('conversationId'),
-      AuditService.getRecentEvents(projectId, limit),
+      AuditService.getRecentEvents(projectId, limit * 2),
+      Message.countDocuments({ projectId }),
+      AuditEvent.countDocuments({ projectId }),
     ]);
 
     const activities: ActivityItem[] = [
@@ -88,9 +99,13 @@ export class AdminService {
       })),
     ];
 
-    return activities
+    const sorted = activities
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
+
+    const total = totalMessages + totalAuditEvents;
+
+    return createPaginatedResult(sorted, total, page, limit);
   }
 
   static async getIntegrationStatus(projectId: string) {

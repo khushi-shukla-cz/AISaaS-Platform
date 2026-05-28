@@ -13,6 +13,7 @@ export interface SendMessageParams {
   projectId: string;
   userId: string;
   content: string;
+  useQueue?: boolean;
 }
 
 export interface MessageResponse {
