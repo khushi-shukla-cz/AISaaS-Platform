@@ -28,9 +28,14 @@ export function ThinkingSteps({ steps, isActive }: ThinkingStepsProps) {
 
   return (
     <div className="flex justify-start mb-4">
-      <div className="max-w-[80%] bg-secondary/50 px-4 py-3 rounded-2xl">
+      <div
+        className="max-w-[80%] bg-secondary/50 px-4 py-3 rounded-2xl"
+        role="status"
+        aria-live="polite"
+      >
+        <span className="sr-only">Assistant is thinking</span>
         <div className="flex items-center gap-3">
-          <div className="flex gap-1">
+          <div className="flex gap-1" aria-hidden>
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
