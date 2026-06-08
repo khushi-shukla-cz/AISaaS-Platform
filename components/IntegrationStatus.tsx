@@ -21,7 +21,7 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
       className="bg-secondary border border-border rounded-xl p-6"
     >
       <h3 className="text-lg font-semibold text-foreground mb-4">Integrations</h3>
-      <div className="space-y-4">
+      <div className="space-y-4" role="list" aria-label="Integration list">
         {integrations.map((integration, index) => (
           <motion.div
             key={integration.name}
@@ -29,6 +29,7 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
             className="flex items-center justify-between p-4 bg-background rounded-lg"
+            role="listitem"
           >
             <div className="flex items-center gap-3">
               <div
