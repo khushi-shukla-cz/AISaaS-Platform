@@ -17,7 +17,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
       transition={{ duration: 0.3 }}
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
     >
-      <div className={`max-w-[80%] ${isUser ? 'order-2' : 'order-1'}`}>
+      <div
+        className={`max-w-[80%] ${isUser ? 'order-2' : 'order-1'}`}
+        role="article"
+        aria-label={isUser ? 'User message' : 'Assistant message'}
+      >
         <div
           className={`px-4 py-3 rounded-2xl ${
             isUser
@@ -25,7 +29,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
               : 'bg-secondary text-secondary-foreground'
           }`}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          <div className="text-sm leading-relaxed whitespace-pre-wrap">
+            {!isUser ? (
+              <div aria-live="polite">{message.content}</div>
+            ) : (
+              <div>{message.content}</div>
+            )}
+          </div>
         </div>
 
         {message.metadata && !isUser && (
