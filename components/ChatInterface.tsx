@@ -67,6 +67,8 @@ export default function ChatInterface({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-2"
+            aria-live="polite"
+            aria-busy={isThinking}
           >
             {messages?.map((message) => (
               <ChatMessage key={message._id} message={message} />
