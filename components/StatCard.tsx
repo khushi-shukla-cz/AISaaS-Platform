@@ -19,6 +19,8 @@ export function StatCard({ title, value, description, icon, trend }: StatCardPro
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-secondary border border-border rounded-xl p-6 space-y-3"
+      role="region"
+      aria-label={`Statistic: ${title}`}
     >
       <div className="flex items-start justify-between">
         <div>
