@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 
 export function LoadingSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="status" aria-live="polite">
+      <span className="sr-only">Loading messages</span>
       {Array.from({ length: count }).map((_, i) => (
         <motion.div
           key={i}
