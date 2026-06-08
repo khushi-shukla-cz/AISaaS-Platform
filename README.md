@@ -4,7 +4,7 @@ A production-grade multi-tenant AI SaaS platform with a config-driven admin dash
 
 ## 🏗️ Architecture Overview
 
-This is a **Production system** designed for scalability, maintainability, and real-world deployment.
+This is a ** Production system** designed for scalability, maintainability, and real-world deployment.
 
 ### Core Features
 
@@ -12,6 +12,7 @@ This is a **Production system** designed for scalability, maintainability, and r
 - **AI Chat System**: ChatGPT-style interface with integration-aware responses
 - **Integration System**: Mock Shopify & CRM integrations that modify AI behavior
 - **Config-Driven Admin Dashboard**: UI dynamically rendered from MongoDB configuration
+- **Operational Hardening**: Request-context auth, tenant-aware rate limiting, audit events, and token-usage telemetry
 - **Production-Ready Code**: Proper layering, error handling, and type safety
 
 ---
@@ -277,6 +278,7 @@ Open http://localhost:3000
 - ✅ Integration badges (SHOPIFY/CRM)
 - ✅ Smooth message animations
 - ✅ Processing time display
+ - ✅ Accessible thinking/typing indicator (aria-live + sr-only)
 
 ### 3. Admin Dashboard (`/admin`)
 
@@ -369,13 +371,13 @@ Current setup has 1 project. To test multi-tenancy:
 - ✅ TanStack Query caching
 
 ### Production Enhancements (Next Steps)
-- Add authentication (NextAuth.js, Clerk)
-- Implement rate limiting per project
-- Add Redis for session caching
+- Swap demo identity fallback for real session auth (NextAuth.js or Clerk)
+- Move rate limiting from in-memory to Redis for multi-instance deployments
+- Add background workers for integration sync and AI retries
 - Horizontal scaling with load balancer
 - Separate read/write database replicas
 - Add monitoring (Sentry, DataDog)
-- Implement audit logging
+- Stream audit logs to a durable observability pipeline
 
 ---
 
@@ -412,6 +414,7 @@ Current setup has 1 project. To test multi-tenancy:
 ✅ **Proper separation of concerns** (Access → Service → Route)
 ✅ **Config-driven design** (MongoDB → UI rendering)
 ✅ **Multi-tenancy** (strict data isolation)
+✅ **Operational concerns** (request context, rate limiting, audit logging)
 ✅ **Integration-aware AI** (context-based responses)
 ✅ **Type safety** (TypeScript everywhere)
 ✅ **Modern React patterns** (Server Components, TanStack Query)
