@@ -33,6 +33,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               }
             }}
             placeholder="Type your message..."
+            aria-label="Message input"
             disabled={disabled}
             rows={1}
             className="w-full px-4 py-3 bg-secondary rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
@@ -43,6 +44,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           type="submit"
+          aria-label="Send message"
+          aria-disabled={!input.trim() || Boolean(disabled)}
           disabled={!input.trim() || disabled}
           className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
